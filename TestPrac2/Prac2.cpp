@@ -21,6 +21,8 @@
 #include "Prac2.h"
 //------------------------------------------------------------------------------
 
+
+
 // This is each thread's "main" function.  It receives a unique ID
 void* Thread_Main(void* Parameter){
  int ID = *((int*)Parameter);
@@ -57,44 +59,21 @@ int main(int argc, char** argv){
  if(!Buffer.Allocate(9, 9, Input.Components)) return -2;
 
  // This is example code of how to copy image files ----------------------------
- printf("Start of sequntial solution.... \n");
- 
-int x, y, xs, ys, x_index, y_index;
+ printf("Start of sequential solution.... \n");
 
-for(y = 0; y < Input.Height; y++){
-	for(x = 0; x < Input.Width*Input.Components; x++){
-	   int i = 0;//printf("x %d \n" ,x);
-	   for(ys = y-4; ys < (y+5); ys++){
-		   y_index = ys;
-		   if(ys > Input.Height){ // values outside the boundary take the boundary value
-			   y_index = Input.Height;
-		   }else if(ys<0){y_index = 0;}
-				
-		   for(xs = x-4; xs < (x+5); xs++){
-			   x_index = xs;
-			   
-			   if(xs > Input.Width*Input.Components){
-				   x_index = Input.Width*Input.Components; 
-			   }else if(xs<0){x_index = 0;}
-			   Buffer.Rows[0][i] = Input.Rows[y_index][x_index];
-			   i += 1; 
-			  // if (x_index<0){printf(" y: %d x: %d  %d \n",y_index ,x_index,i); 
-			  // printf("widt %d \n" ,Input.Width*Input.Components);
-			//		return-7;
-			  // }
-		   }
-	   }
-	   //printf(" y: %d x: %d \n",y_index ,x_index);
-	   std::sort(Buffer.Rows[0],Buffer.Rows[0]+Buffer_size);
-	Output.Rows[y][x] = Buffer.Rows[0][Buffer_size/2];
-
-	}
-}
-  
- 
- printf("End of sequntial solution...\n\n");
+ for(j = 0; j < 10; j++){
+  tic();
+  int x, y;
+  for(y = 0; y < Input.Height; y++){
+   for(x = 0; x < Input.Width*Input.Components; x++){
+    Output.Rows[y][x] = Input.Rows[y][x];
+   }
+  }
+  printf("Time = %lg ms\n", (double)toc()/1e-3);
+ } 
+ printf("End of sequential solution...\n\n");
  // End of example -------------------------------------------------------------
-return 4;
+
  // Spawn threads...
  int       Thread_ID[Thread_Count]; // Structure to keep the tread ID
  pthread_t Thread   [Thread_Count]; // pThreads structure for thread admin
