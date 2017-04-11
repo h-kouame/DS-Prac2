@@ -1,0 +1,15 @@
+Opened "Data/greatwall.jpg": width = 1920, height = 2560, c = 3
+File closed
+
+Start of sequential solution....
+Time = 263512 ms
+Time = 264165 ms
+Time = 253880 ms
+Time = 251171 ms
+Time = 251023 ms
+Time = 251620 ms
+Time = 252319 ms
+Time = 252445 ms
+Time = 295513 ms
+Time = 279957 ms
+End of sequential solution...

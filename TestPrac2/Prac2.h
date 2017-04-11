@@ -24,8 +24,10 @@
 
 #include <math.h>
 #include <stdio.h>
+#include <vector>
 #include <stdlib.h>
 #include <pthread.h>
+#include <iostream>
 //------------------------------------------------------------------------------
 
 #include "JPEG.h"
@@ -48,6 +50,27 @@ pthread_mutex_t Mutex; // General-purpose MutEx
 // The thread "main" function.  Receives a unique thread ID as parameter
 void* Thread_Main(void* Parameter);
 //------------------------------------------------------------------------------
+
+//helper to fill Buffer with surrounding pixels
+const std::vector<unsigned int> Fill_Buffer(int y, int x);
+
+//for debugging
+void Print_Pixels(std::vector<unsigned int> pixels) {
+	for (int i = 0; i < 9; ++i)
+	{
+		for (int j = 0; j < 9; ++j)
+		{
+			std::cout << pixels[i*9 + j] << " ";
+		}
+		std::cout << std::endl;
+	}
+}
+
+//get the median of 81 int values
+const unsigned int Get_Median(std::vector<unsigned int> pixels) {
+	std::sort(pixels.begin(), pixels.end());
+	return pixels[Buffer_size/2];
+}
 
 #endif
 //------------------------------------------------------------------------------
