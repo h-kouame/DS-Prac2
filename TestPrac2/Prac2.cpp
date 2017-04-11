@@ -56,7 +56,7 @@ const std::vector<unsigned int> Fill_Buffer(int y, int x) {
 			continue;
 		}
 		// std::cout << "non-zero row" << std::endl;
-		for (int col = x - 4*Input.Components; col <= x + 4*Input.Components; col = col + 3)
+		for (int col = x - 4*Input.Components; col <= x + 4*Input.Components; col += 3)
 		{
 			//zero fill the pixels outside the image
 			if(col < 0 || col >= Input.Width*Input.Components) {
@@ -92,16 +92,17 @@ int main(int argc, char** argv){
 
 	 // This is example code of how to copy image files ----------------------------
 	printf("Start of sequential solution.... \n");
-	for(j = 0; j < 1; j++){
+	for(j = 0; j < 10; j++){
 	 	tic();
 		int x, y;
 	  	for(y = 0; y < Input.Height; y++){
 	   		for(x = 0; x < Input.Width*Input.Components; x++){	   	
 	   			std::vector<unsigned int> pixels = Fill_Buffer(y,x);
+	   			// Print_Pixels(pixels);
 				unsigned int median = Get_Median(pixels);
 				// sort(pixels.begin(), pixels.end());
 				// Print_Pixels(pixels);
-				cout <<"Median: "<< median  <<endl<<endl;	
+				// cout <<"Median: "<< median  <<endl<<endl;	
 	    		Output.Rows[y][x] = (unsigned char)median;
 	   		}
 	  	}

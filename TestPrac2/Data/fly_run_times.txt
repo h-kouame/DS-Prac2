@@ -1,0 +1,16 @@
+Clock resolution: 500 ns
+Opened "Data/fly.jpg": width = 821, height = 1024, c = 3
+File closed
+
+Start of sequential solution....
+Time = 41829.2 ms
+Time = 42626.8 ms
+Time = 41716.6 ms
+Time = 41753.9 ms
+Time = 41703.6 ms
+Time = 41702.8 ms
+Time = 42872.6 ms
+Time = 41846.3 ms
+Time = 42238.9 ms
+Time = 42679.1 ms
+End of sequential solution...
