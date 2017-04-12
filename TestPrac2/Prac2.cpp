@@ -27,12 +27,21 @@
 void* Thread_Main(void* Parameter){
 
 	int x, y;
-	// figure out which part of the picture to process
+	// figure out which part (block) of the picture to process
 	int ID = *((int*)Parameter);
-	int i = ID/sqrt(Thread_Count);
-	int x_start = (ID - i*sqrt(Thread_Count))*Thread_Col_size;
-	int y_start = i*Thread_Row_size;
-	int x_end = x_start + Thread_Col_size;
+	// int i = ID/sqrt(Thread_Count);
+	// int x_start = (ID - i*sqrt(Thread_Count))*Thread_Col_size;
+	// int y_start = i*Thread_Row_size;
+	// int x_end = x_start + Thread_Col_size;
+	// int y_end = y_start + Thread_Row_size;
+
+	//adjecent rows
+	Thread_Row_size = Input.Height/Thread_Count;
+	if (Input.Height%Thread_Count != 0){Thread_Row_size = Input.Height/Thread_Count+1;}
+	// int i = ID/Thread_Count;
+	int x_start = 0;
+	int y_start = ID*Thread_Row_size;
+	int x_end = Input.Width*Input.Components;
 	int y_end = y_start + Thread_Row_size;
 
 	pthread_mutex_lock(&Mutex);
@@ -100,7 +109,7 @@ int main(int argc, char** argv){
 	pthread_mutex_init(&Mutex, 0);
 
 	 // Read the input image
-	if(!Input.Read("Data/small.jpg")){
+	if(!Input.Read("Data/fly.jpg")){
 	  	printf("Cannot read image\n");
 	  	return -1;
 	}
@@ -164,7 +173,7 @@ int main(int argc, char** argv){
 	 
 
 	 // Write the output image
-	 if(!Output.Write("Data/Output.jpg")){
+	 if(!Output.Write("Data/fly_Output_parallel.jpg")){
 	  printf("Cannot write image\n");
 	  return -3;
 	 }
