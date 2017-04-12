@@ -68,31 +68,36 @@ void* Thread_Main(void* Parameter){
  return 0;
 }
 
+// implementation of the sequential solution (golden measurement)
+void Sequentional(void){
+	int x, y;
+		  	for(y = 0; y < Input.Height; y++){
+		   		for(x = 0; x < Input.Width*Input.Components; x++){	
+		   			std::vector<unsigned int> pixels = Fill_Buffer(y,x);
+					unsigned int median = Get_Median(pixels);	
+		    		Output.Rows[y][x] = (unsigned char)median;
+		   		}
+		  	}
+}
+
 const std::vector<unsigned int> Fill_Buffer(int y, int x) {
 	std::vector<unsigned int> pixels;
-	// std::cout << "y: " << y <<" x: " << x << std::endl;
 	for (int row = y-4; row <= y+4; row++)
 	{
-		// std::cout << "row: " << row << std::endl;
 		//zero fill the pixels outside the image
 		if(row < 0 || row >= Input.Height) {
-			// std::cout << "row: " << row << std::endl;
 			for (int col = 0; col < 9; col++){
-				// std::cout << "zero row" << std::endl;
 				pixels.push_back((unsigned int)0);
 			}
 			continue;
 		}
-		// std::cout << "non-zero row" << std::endl;
 		for (int col = x - 4*Input.Components; col <= x + 4*Input.Components; col +=Input.Components)
 		{
 			//zero fill the pixels outside the image
 			if(col < 0 || col >= Input.Width*Input.Components) {
-				// std::cout << "zero col" << std::endl;
 				pixels.push_back((unsigned int)0);
 				continue;
 			}
-			// std::cout << "non-zero col" << std::endl;
 			pixels.push_back((unsigned int)Input.Rows[row][col]);
 		}
 	}
@@ -106,10 +111,11 @@ int main(int argc, char** argv){
 	int j;
 	 // Initialise everything that requires initialisation
 	tic();
+	std::ostringstream oss;
 	pthread_mutex_init(&Mutex, 0);
 
 	 // Read the input image
-	if(!Input.Read("Data/fly.jpg")){
+	if(!Input.Read("Data/small.jpg")){
 	  	printf("Cannot read image\n");
 	  	return -1;
 	}
@@ -119,33 +125,26 @@ int main(int argc, char** argv){
 	if(!Buffer.Allocate(9, 9, Input.Components)) return -2;
 	//comment out serial part for now
 	 // This is example code of how to copy image files ----------------------------
-	// printf("Start of sequential solution.... \n");
-	// for(j = 0; j < 10; j++){
-	//  	tic();
-	// 	int x, y;
-	//   	for(y = 0; y < Input.Height; y++){
-	//    		for(x = 0; x < Input.Width*Input.Components; x++){	//change   	
-	//    			std::vector<unsigned int> pixels = Fill_Buffer(y,x);
-	//    			// Print_Pixels(pixels);
-	// 			unsigned int median = Get_Median(pixels);
-	// 			// sort(pixels.begin(), pixels.end());
-	// 			// Print_Pixels(pixels);
-	// 			// cout <<"Median: "<< median  <<endl<<endl;	
-	//     		Output.Rows[y][x] = (unsigned char)median;
-	//    		}
-	//   	}
-	//   	printf("Time = %lg ms\n", (double)toc()/1e-3);
-	// } 
-	// printf("End of sequential solution...\n\n");
+	 oss<<"Start of sequential solution.... \n";
+	printf("Start of sequential solution.... \n");
+	for(j = 0; j < 4; j++){
+	 	tic();
+		Sequentional();
+		oss << "Time =  "<<toc()/1e-3<<" ms\n";
+
+	  	printf("Time = %lg ms\n", (double)toc()/1e-3);
+	} 
+	printf("End of sequential solution...\n\n");
+	oss<<"End of sequential solution...\n\n";
 	 // End of example -------------------------------------------------------------
 
-	
 	
 	 // Spawn threads...
 	
  	Thread_Row_size = Input.Height/sqrt(Thread_Count) + 1;
  	Thread_Col_size = Input.Width*Input.Components/sqrt(Thread_Count) + Input.Components;
-	 
+	
+	 oss<<"Start of parallel solution...\n";
 	 for(j = 0; j < Thread_Count; j++){
 	  Thread_ID[j] = j;
 	  pthread_create(Thread+j, 0, Thread_Main, Thread_ID+j);
@@ -170,14 +169,21 @@ int main(int argc, char** argv){
 	 // No more active threads, so no more critical sections required
 	 printf("All threads have quit\n");
 	 printf("Time taken for threads to run = %lg ms\n", toc()/1e-3);
-	 
+	 oss << "Time taken for threads to run =  "<<toc()/1e-3<<" ms\n";
+
 
 	 // Write the output image
-	 if(!Output.Write("Data/fly_Output_parallel.jpg")){
+	 if(!Output.Write("output.jpg")){
 	  printf("Cannot write image\n");
 	  return -3;
 	 }
-
+	 
+	 // record results
+	ofstream myfile;
+	myfile.open ("results.txt");
+	myfile << oss.str();
+	myfile.close();
+	
 	 // Clean-up
 	 pthread_mutex_destroy(&Mutex);
 	 return 0;

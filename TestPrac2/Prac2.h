@@ -28,6 +28,9 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <iostream>
+#include <string>
+#include <fstream>
+#include <sstream>
 //------------------------------------------------------------------------------
 
 #include "JPEG.h"
@@ -70,6 +73,8 @@ void Print_Pixels(std::vector<unsigned int> pixels) {
 		std::cout << std::endl;
 	}
 }
+
+void Sequentional(void);
 
 //get the median of 81 int values
 const unsigned int Get_Median(std::vector<unsigned int> pixels) {
