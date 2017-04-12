@@ -47,6 +47,11 @@ JPEG Buffer;
 pthread_mutex_t Mutex; // General-purpose MutEx
 //------------------------------------------------------------------------------
 
+int Thread_ID[Thread_Count]; // Structure to keep the tread ID
+ pthread_t Thread   [Thread_Count]; // pThreads structure for thread admin
+ int Thread_Row_size ;
+ int Thread_Col_size;
+//------------------------------------------------------------------------------
 // The thread "main" function.  Receives a unique thread ID as parameter
 void* Thread_Main(void* Parameter);
 //------------------------------------------------------------------------------
