@@ -56,7 +56,7 @@ const std::vector<unsigned int> Fill_Buffer(int y, int x) {
 			continue;
 		}
 		// std::cout << "non-zero row" << std::endl;
-		for (int col = x - 4*Input.Components; col <= x + 4*Input.Components; col += 3)
+		for (int col = x - 4*Input.Components; col <= x + 4*Input.Components; col += Input.Components)
 		{
 			//zero fill the pixels outside the image
 			if(col < 0 || col >= Input.Width*Input.Components) {
