@@ -1,0 +1,9 @@
+Start of sequential solution.... 
+Time =  13887.2 ms
+Time =  14191.3 ms
+Time =  13094.8 ms
+Time =  13820.7 ms
+End of sequential solution...
+
+Start of parallel solution...
+Time taken for threads to run =  1658.76 ms

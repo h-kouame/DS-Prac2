@@ -62,6 +62,22 @@ void* Thread_Main(void* Parameter);
 //helper to fill Buffer with surrounding pixels
 const std::vector<unsigned int> Fill_Buffer(int y, int x);
 
+//Bubble sort
+std::vector<unsigned int>  Bubble_Sort(std::vector<unsigned int> pixels){
+	int N = pixels.size();
+	unsigned int temp = 0;
+	for (int i = 0; i < N - 1; i++) {
+		for (int j = 1; j < N - i; j++) {
+			if (pixels[j - 1] > pixels[j]) {
+				temp = pixels[j - 1];
+				pixels[j - 1] = pixels[j];
+				pixels[j] = temp;
+			}
+		}
+	}
+	return pixels;
+};
+
 //for debugging
 void Print_Pixels(std::vector<unsigned int> pixels) {
 	for (int i = 0; i < 9; ++i)
@@ -80,7 +96,13 @@ void Sequentional(void);
 const unsigned int Get_Median(std::vector<unsigned int> pixels) {
 	std::sort(pixels.begin(), pixels.end());
 	return pixels[Buffer_size/2];
-}
+};
+
+//get the median of 81 int values
+const unsigned int Get_Median_Bubble(std::vector<unsigned int> pixels) {
+	;
+	return Bubble_Sort(pixels)[Buffer_size/2];
+};
 
 #endif
 //------------------------------------------------------------------------------
