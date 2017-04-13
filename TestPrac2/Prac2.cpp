@@ -25,13 +25,41 @@
 
 // This is each thread's "main" function.  It receives a unique ID
 void* Thread_Main(void* Parameter){
- int ID = *((int*)Parameter);
 
- pthread_mutex_lock(&Mutex);
-  printf("Hello from thread %d\n", ID);
- pthread_mutex_unlock(&Mutex);
+	int x, y;
+	// figure out which part (block) of the picture to process
+	int ID = *((int*)Parameter);
+	// int i = ID/sqrt(Thread_Count);
+	// int x_start = (ID - i*sqrt(Thread_Count))*Thread_Col_size;
+	// int y_start = i*Thread_Row_size;
+	// int x_end = x_start + Thread_Col_size;
+	// int y_end = y_start + Thread_Row_size;
 
- for(int j = 0; j < 1e6; j++); // Do some heavy calculation
+	//adjecent rows
+	Thread_Row_size = Input.Height/Thread_Count;
+	if (Input.Height%Thread_Count != 0){Thread_Row_size = Input.Height/Thread_Count+1;}
+	// int i = ID/Thread_Count;
+	int x_start = 0;
+	int y_start = ID*Thread_Row_size;
+	int x_end = Input.Width*Input.Components;
+	int y_end = y_start + Thread_Row_size;
+
+	pthread_mutex_lock(&Mutex);
+  	printf("Hello from thread %d ---y:%d  y1:%d x:%d  x1:%d\n", ID,y_start,y_end,x_start,x_end);
+	 pthread_mutex_unlock(&Mutex);
+
+  	for(y = y_start; y < y_end; y++){
+  		if(y >= Input.Height){break;}
+   		for(x = x_start; x < x_end; x++){	 
+   			if(x > Input.Width*Input.Components){break;}  	
+   			std::vector<unsigned int> pixels = Fill_Buffer(y,x);
+			unsigned int median = Get_Median(pixels);
+			pthread_mutex_lock(&Mutex);	
+    		Output.Rows[y][x] = (unsigned char)median;
+    		pthread_mutex_unlock(&Mutex);
+   		}
+  	}
+
 
  pthread_mutex_lock(&Mutex);
   printf("Thread %d: I QUIT!\n", ID);
@@ -40,17 +68,25 @@ void* Thread_Main(void* Parameter){
  return 0;
 }
 
+// implementation of the sequential solution (golden measurement)
+void Sequentional(void){
+	int x, y;
+		  	for(y = 0; y < Input.Height; y++){
+		   		for(x = 0; x < Input.Width*Input.Components; x++){	
+		   			std::vector<unsigned int> pixels = Fill_Buffer(y,x);
+					unsigned int median = Get_Median(pixels);	
+		    		Output.Rows[y][x] = (unsigned char)median;
+		   		}
+		  	}
+}
+
 const std::vector<unsigned int> Fill_Buffer(int y, int x) {
 	std::vector<unsigned int> pixels;
-	// std::cout << "y: " << y <<" x: " << x << std::endl;
-	for (int row = y-4; row <= y+4; ++row)
+	for (int row = y-4; row <= y+4; row++)
 	{
-		// std::cout << "row: " << row << std::endl;
 		//zero fill the pixels outside the image
 		if(row < 0 || row >= Input.Height) {
-			// std::cout << "row: " << row << std::endl;
-			for (int col = 0; col < 9; ++col){
-				// std::cout << "zero row" << std::endl;
+			for (int col = 0; col < 9; col++){
 				pixels.push_back((unsigned int)0);
 			}
 			continue;
@@ -60,11 +96,9 @@ const std::vector<unsigned int> Fill_Buffer(int y, int x) {
 		{
 			//zero fill the pixels outside the image
 			if(col < 0 || col >= Input.Width*Input.Components) {
-				// std::cout << "zero col" << std::endl;
 				pixels.push_back((unsigned int)0);
 				continue;
 			}
-			// std::cout << "non-zero col" << std::endl;
 			pixels.push_back((unsigned int)Input.Rows[row][col]);
 		}
 	}
@@ -78,10 +112,11 @@ int main(int argc, char** argv){
 	int j;
 	 // Initialise everything that requires initialisation
 	tic();
+	std::ostringstream oss;
 	pthread_mutex_init(&Mutex, 0);
 
 	 // Read the input image
-	if(!Input.Read("Data/greatwall.jpg")){
+	if(!Input.Read("Data/small.jpg")){
 	  	printf("Cannot read image\n");
 	  	return -1;
 	}
@@ -89,38 +124,33 @@ int main(int argc, char** argv){
 	 // Allocated RAM for the output image
 	if(!Output.Allocate(Input.Width, Input.Height, Input.Components)) return -2;
 	if(!Buffer.Allocate(9, 9, Input.Components)) return -2;
-
+	//comment out serial part for now
 	 // This is example code of how to copy image files ----------------------------
+	 oss<<"Start of sequential solution.... \n";
 	printf("Start of sequential solution.... \n");
-	for(j = 0; j < 10; j++){
+	for(j = 0; j < 4; j++){
 	 	tic();
-		int x, y;
-	  	for(y = 0; y < Input.Height; y++){
-	   		for(x = 0; x < Input.Width*Input.Components; x++){	   	
-	   			std::vector<unsigned int> pixels = Fill_Buffer(y,x);
-	   			// Print_Pixels(pixels);
-				unsigned int median = Get_Median(pixels);
-				// sort(pixels.begin(), pixels.end());
-				// Print_Pixels(pixels);
-				// cout <<"Median: "<< median  <<endl<<endl;	
-	    		Output.Rows[y][x] = (unsigned char)median;
-	   		}
-	  	}
+		Sequentional();
+		oss << "Time =  "<<toc()/1e-3<<" ms\n";
+
 	  	printf("Time = %lg ms\n", (double)toc()/1e-3);
 	} 
 	printf("End of sequential solution...\n\n");
+	oss<<"End of sequential solution...\n\n";
 	 // End of example -------------------------------------------------------------
 
-	//comment out parallel part for now
-	/*
+	
 	 // Spawn threads...
-	 int       Thread_ID[Thread_Count]; // Structure to keep the tread ID
-	 pthread_t Thread   [Thread_Count]; // pThreads structure for thread admin
-
+	
+ 	Thread_Row_size = Input.Height/sqrt(Thread_Count) + 1;
+ 	Thread_Col_size = Input.Width*Input.Components/sqrt(Thread_Count) + Input.Components;
+	
+	 oss<<"Start of parallel solution...\n";
 	 for(j = 0; j < Thread_Count; j++){
 	  Thread_ID[j] = j;
 	  pthread_create(Thread+j, 0, Thread_Main, Thread_ID+j);
 	 }
+	 
 
 	 // Printing stuff is a critical section...
 	 pthread_mutex_lock(&Mutex);
@@ -140,14 +170,21 @@ int main(int argc, char** argv){
 	 // No more active threads, so no more critical sections required
 	 printf("All threads have quit\n");
 	 printf("Time taken for threads to run = %lg ms\n", toc()/1e-3);
-	 */
+	 oss << "Time taken for threads to run =  "<<toc()/1e-3<<" ms\n";
+
 
 	 // Write the output image
-	 if(!Output.Write("Data/Output.jpg")){
+	 if(!Output.Write("output.jpg")){
 	  printf("Cannot write image\n");
 	  return -3;
 	 }
-
+	 
+	 // record results
+	ofstream myfile;
+	myfile.open ("results.txt");
+	myfile << oss.str();
+	myfile.close();
+	
 	 // Clean-up
 	 pthread_mutex_destroy(&Mutex);
 	 return 0;

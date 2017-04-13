@@ -28,6 +28,9 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <iostream>
+#include <string>
+#include <fstream>
+#include <sstream>
 //------------------------------------------------------------------------------
 
 #include "JPEG.h"
@@ -47,6 +50,11 @@ JPEG Buffer;
 pthread_mutex_t Mutex; // General-purpose MutEx
 //------------------------------------------------------------------------------
 
+int Thread_ID[Thread_Count]; // Structure to keep the tread ID
+ pthread_t Thread   [Thread_Count]; // pThreads structure for thread admin
+ int Thread_Row_size ;
+ int Thread_Col_size;
+//------------------------------------------------------------------------------
 // The thread "main" function.  Receives a unique thread ID as parameter
 void* Thread_Main(void* Parameter);
 //------------------------------------------------------------------------------
@@ -65,6 +73,8 @@ void Print_Pixels(std::vector<unsigned int> pixels) {
 		std::cout << std::endl;
 	}
 }
+
+void Sequentional(void);
 
 //get the median of 81 int values
 const unsigned int Get_Median(std::vector<unsigned int> pixels) {
