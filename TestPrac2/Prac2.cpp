@@ -74,7 +74,10 @@ void Sequentional(void){
 		  	for(y = 0; y < Input.Height; y++){
 		   		for(x = 0; x < Input.Width*Input.Components; x++){	
 		   			std::vector<unsigned int> pixels = Fill_Buffer(y,x);
-					unsigned int median = Get_Median(pixels);	
+					unsigned int median = Get_Median_Bubble(pixels);
+					// Print_Pixels(pixels);
+					// std::cout <<"Median" <<median<<std::endl;
+						
 		    		Output.Rows[y][x] = (unsigned char)median;
 		   		}
 		  	}
@@ -127,7 +130,7 @@ int main(int argc, char** argv){
 	//comment out serial part for now
 	 // This is example code of how to copy image files ----------------------------
 	 oss<<"Start of sequential solution.... \n";
-	printf("Start of sequential solution.... \n");
+	
 	for(j = 0; j < 4; j++){
 	 	tic();
 		Sequentional();
